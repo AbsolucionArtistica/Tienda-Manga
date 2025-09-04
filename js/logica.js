@@ -1,4 +1,6 @@
-    //1. Lista de productos (puedes modificar o agregar más)
+// logica.js
+
+// Lista de productos disponibles en catálogo
 const productos = [
   {
     id: 1,
@@ -31,7 +33,7 @@ const productos = [
     id: 4,
     titulo: "Los Diarios De La Boticaria",
     volumen: 1,
-    autor: "Cristina Mitre",
+    autor: "Maria V. Giner",
     editorial: "Panini",
     imagen: "/img/LosDiariosDeLaBoticaria_1_PANINI.jpg",
     precio: 10990
@@ -71,62 +73,113 @@ const productos = [
     editorial: "Ivrea Ar",
     imagen: "/img/Dandadan_1_IVREAAR.jpg",
     precio: 9990
-  }
+  },
 ];
-    //2. Función para renderizar productos
-    function mostrarProductos() {
-      const contenedor = document.getElementById("lista-productos");
-      contenedor.innerHTML = "";
-      productos.forEach(producto => {
-        const div = document.createElement("div");
-        div.className = "producto";
-        div.innerHTML = `
-          <img src="${producto.imagen}" alt="${producto.titulo}">
-          <h3>${producto.titulo}</h3>
-          <p><strong>Autor:</strong> ${producto.autor}</p>
-          <p><strong>Editorial:</strong> ${producto.editorial}</p>
-          <button onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
-        `;
-        contenedor.appendChild(div);
-      });
-    }
 
-    //3. Función para agregar al carrito usando localStorage
-    function agregarAlCarrito(idProducto) {
-      const producto = productos.find(p => p.id === idProducto);
-      let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+// Función para formatear precio a string con $
+function formatearPrecio(precio) {
+  return `$${precio.toLocaleString('es-CL')}`;
+}
 
-      // Opcional: evitar duplicados
-      const yaEsta = carrito.find(p => p.id === producto.id);
-      if (!yaEsta) {
-        carrito.push(producto);
-        localStorage.setItem("carrito", JSON.stringify(carrito));
-        mostrarCarrito();
-      } else {
-        alert("Este producto ya está en el carrito.");
-      }
-    }
+// --- Renderiza el catálogo en el contenedor con id "lista-productos" ---
+function renderizarCatalogo() {
+  const contenedor = document.getElementById('lista-productos');
+  if (!contenedor) return;
 
-    //4. Función para mostrar el carrito
-    function mostrarCarrito() {
-      const contenedor = document.getElementById("carrito");
-      const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-      contenedor.innerHTML = "";
+  contenedor.innerHTML = '';
 
-      if (carrito.length === 0) {
-        contenedor.innerHTML = "<p>El carrito está vacío.</p>";
-        return;
-      }
+  productos.forEach(producto => {
+    const card = document.createElement('div');
+    card.className = 'col-3';
+    card.innerHTML = `
+      <div class="card h-100">
+        <img src="${producto.imagen}" class="card-img-top product-img" alt="${producto.titulo} Vol.${producto.volumen}">
+        <div class="card-body">
+          <h5 class="card-title">${producto.titulo} N.${producto.volumen}</h5>
+          <p class="card-text">Editorial ${producto.editorial}</p>
+          <p class="card-text">${formatearPrecio(producto.precio)}</p>
+          <a href="#" class="btn main-color text-white w-100 btn-agregar" data-id="${producto.id}">Agregar al carrito</a>
+        </div>
+      </div>
+    `;
+    contenedor.appendChild(card);
+  });
 
-      carrito.forEach(producto => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <p><strong>${producto.titulo}</strong> de ${producto.autor} (${producto.editorial})</p>
-        `;
-        contenedor.appendChild(div);
-      });
-    }
+  // Agregar evento click a todos los botones "Agregar al carrito"
+  const botonesAgregar = contenedor.querySelectorAll('.btn-agregar');
+  botonesAgregar.forEach(boton => {
+    boton.addEventListener('click', agregarAlCarrito);
+  });
+}
 
-    //5. Inicialización
-    mostrarProductos();
-    mostrarCarrito();
+// --- Función para agregar un producto al carrito ---
+function agregarAlCarrito(event) {
+  event.preventDefault();
+  const idProducto = parseInt(event.currentTarget.getAttribute('data-id'));
+  const producto = productos.find(p => p.id === idProducto);
+  if (!producto) return;
+
+  // Obtener carrito desde localStorage o inicializar vacío
+  let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+  // Verificar si el producto ya está en el carrito
+  const productoEnCarrito = carrito.find(item => item.id === producto.id);
+  if (productoEnCarrito) {
+    // Si ya existe, aumentar cantidad
+    productoEnCarrito.cantidad += 1;
+  } else {
+    // Sino, agregar nuevo producto con cantidad 1
+    carrito.push({...producto, cantidad: 1});
+  }
+
+  // Guardar carrito actualizado en localStorage
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+
+  alert(`${producto.titulo} agregado al carrito.`);
+  // Opcional: actualizar la vista del carrito si tienes un contenedor para eso
+}
+
+// --- Renderiza el carrito en el contenedor con id "lista-carrito" ---
+function renderizarCarrito() {
+  const contenedor = document.getElementById('lista-carrito');
+  if (!contenedor) return;
+
+  const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+  contenedor.innerHTML = '';
+
+  if (carrito.length === 0) {
+    contenedor.innerHTML = '<p>Tu carrito está vacío.</p>';
+    return;
+  }
+
+  carrito.forEach(producto => {
+    const card = document.createElement('div');
+    card.className = 'card mb-3';
+    card.innerHTML = `
+      <div class="row g-0 align-items-center">
+        <div class="col-3">
+          <img src="${producto.imagen}" class="img-fluid rounded-start" alt="${producto.titulo}">
+        </div>
+        <div class="col-7">
+          <div class="card-body">
+            <h5 class="card-title">${producto.titulo} N.${producto.volumen}</h5>
+            <p class="card-text">Editorial ${producto.editorial}</p>
+            <p class="card-text">Cantidad: ${producto.cantidad}</p>
+            <p class="card-text">Precio unitario: ${formatearPrecio(producto.precio)}</p>
+            <p class="card-text">Subtotal: ${formatearPrecio(producto.precio * producto.cantidad)}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    contenedor.appendChild(card);
+  });
+
+  // Opcional: podrías agregar total, botones para eliminar productos, etc.
+}
+
+// Ejecutar renderizado del catálogo cuando carga la página
+document.addEventListener('DOMContentLoaded', () => {
+  renderizarCatalogo();
+  renderizarCarrito(); // si tienes contenedor para carrito en la página actual
+});
