@@ -30,3 +30,31 @@
 #productosCarousel .carousel-control-next {
   right: -50px;          /* Más separado a la derecha */
 }
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  max-height: 380px; /* altura normal, ajusta según tu card */
+  cursor: pointer;
+}
+
+.product-card .extra-info {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+.product-card:hover,
+.product-card:focus-within {
+  max-height: 450px; /* aumenta la altura para mostrar más info */
+  padding-bottom: 1rem;
+}
+
+.product-card:hover .extra-info,
+.product-card:focus-within .extra-info {
+  max-height: 100px;
+  opacity: 1;
+  margin-top: 0.5rem;
+}
