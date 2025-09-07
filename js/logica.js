@@ -188,26 +188,76 @@ function renderizarCarrito() {
     return;
   }
 
-  carrito.forEach(producto => {
+  // Contenedor vertical y total a la derecha
+  const wrapper = document.createElement('div');
+  wrapper.className = 'd-flex flex-row align-items-start justify-content-between';
+
+  // Lista de productos (vertical)
+  const lista = document.createElement('div');
+  lista.className = 'd-flex flex-column gap-2';
+  lista.style.minWidth = '320px';
+  lista.style.maxWidth = '420px';
+
+  let total = 0;
+  carrito.forEach((producto, idx) => {
+    total += producto.precio * producto.cantidad;
     const card = document.createElement('div');
-    card.className = 'card mb-3';
+    card.className = 'card mb-2 py-2 px-5 d-flex flex-row align-items-center justify-content-between';
+    card.style.width = '100%';
     card.innerHTML = `
-      <div class="row g-0 align-items-center">
-        <div class="col-3">
-          <img src="${producto.imagen}" class="img-fluid rounded-start" alt="${producto.titulo}">
+      <img src="${producto.imagen}" style="width:60px;height:60px;object-fit:cover;" class="rounded me-2" alt="${producto.titulo}">
+      <div class="flex-grow-1 ms-2">
+        <h6 class="mb-1">${producto.titulo} N.${producto.volumen}</h6>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-secondary btn-restar" data-idx="${idx}">-</button>
+          <span class="mx-1">${producto.cantidad}</span>
+          <button class="btn btn-sm btn-outline-secondary btn-sumar" data-idx="${idx}">+</button>
         </div>
-        <div class="col-7">
-          <div class="card-body">
-            <h5 class="card-title">${producto.titulo} N.${producto.volumen}</h5>
-            <p class="card-text">Editorial ${producto.editorial}</p>
-            <p class="card-text">Cantidad: ${producto.cantidad}</p>
-            <p class="card-text">Precio unitario: ${formatearPrecio(producto.precio)}</p>
-            <p class="card-text">Subtotal: ${formatearPrecio(producto.precio * producto.cantidad)}</p>
-          </div>
-        </div>
+        <small class="text-muted">${formatearPrecio(producto.precio)} c/u</small>
+      </div>
+      <div class="text-end">
+        <strong>${formatearPrecio(producto.precio * producto.cantidad)}</strong>
       </div>
     `;
-    contenedor.appendChild(card);
+    lista.appendChild(card);
+  });
+
+  // Apartado de total
+  const totalDiv = document.createElement('div');
+  totalDiv.className = 'card p-3 ms-3';
+  totalDiv.style.minWidth = '180px';
+  totalDiv.innerHTML = `
+    <h5 class="mb-3">Total</h5>
+    <div class="fs-4 fw-bold">${formatearPrecio(total)}</div>
+    <button class="btn main-color text-white w-100 mt-3">Finalizar Compra</button>
+  `;
+
+  wrapper.appendChild(lista);
+  wrapper.appendChild(totalDiv);
+  contenedor.appendChild(wrapper);
+
+  // Eventos para sumar/restar cantidad
+  lista.querySelectorAll('.btn-sumar').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.getAttribute('data-idx'));
+      let carrito = obtenerCarrito();
+      carrito[idx].cantidad += 1;
+      guardarCarrito(carrito);
+      renderizarCarrito();
+    });
+  });
+  lista.querySelectorAll('.btn-restar').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.getAttribute('data-idx'));
+      let carrito = obtenerCarrito();
+      if (carrito[idx].cantidad > 1) {
+        carrito[idx].cantidad -= 1;
+      } else {
+        carrito.splice(idx, 1);
+      }
+      guardarCarrito(carrito);
+      renderizarCarrito();
+    });
   });
 }
 
