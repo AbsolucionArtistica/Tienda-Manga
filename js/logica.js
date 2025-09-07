@@ -81,6 +81,42 @@ function formatearPrecio(precio) {
   return `$${precio.toLocaleString('es-CL')}`;
 }
 
+// --- Obtener usuario logueado desde cuenta.js si existe ---
+function getUsuarioLogueado() {
+  if (typeof obtenerUsuarioLogueado === 'function') {
+    return obtenerUsuarioLogueado();
+  }
+  return localStorage.getItem('usuarioLogueado');
+}
+
+// --- Guardar carrito por usuario si está logueado ---
+function guardarCarrito(carrito) {
+  const usuario = getUsuarioLogueado();
+  if (usuario) {
+    if (typeof guardarCarritoUsuario === 'function') {
+      guardarCarritoUsuario(usuario, carrito);
+    } else {
+      localStorage.setItem('carrito_' + usuario, JSON.stringify(carrito));
+    }
+  } else {
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+  }
+}
+
+// --- Obtener carrito por usuario si está logueado ---
+function obtenerCarrito() {
+  const usuario = getUsuarioLogueado();
+  if (usuario) {
+    if (typeof obtenerCarritoUsuario === 'function') {
+      return obtenerCarritoUsuario(usuario);
+    } else {
+      return JSON.parse(localStorage.getItem('carrito_' + usuario)) || [];
+    }
+  } else {
+    return JSON.parse(localStorage.getItem('carrito')) || [];
+  }
+}
+
 // --- Renderiza el catálogo en el contenedor con id "lista-productos" ---
 function renderizarCatalogo() {
   const contenedor = document.getElementById('lista-productos');
@@ -98,11 +134,6 @@ function renderizarCatalogo() {
         <h5 class="card-title">${producto.titulo} N.${producto.volumen}</h5>
         <p class="card-text">Editorial ${producto.editorial}</p>
         <p class="card-text">${formatearPrecio(producto.precio)}</p>
-        
-        <div class="extra-info">
-          <p class="card-text">Autor: ${producto.autor}</p>
-        </div>
-
         <a href="#" class="btn main-color text-white w-100 btn-agregar" data-id="${producto.id}">Agregar al carrito</a>
       </div>
     </div>
@@ -125,21 +156,19 @@ function agregarAlCarrito(event) {
   const producto = productos.find(p => p.id === idProducto);
   if (!producto) return;
 
-  // Obtener carrito desde localStorage o inicializar vacío
-  let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+  // Obtener carrito desde localStorage o por usuario
+  let carrito = obtenerCarrito();
 
   // Verificar si el producto ya está en el carrito
   const productoEnCarrito = carrito.find(item => item.id === producto.id);
   if (productoEnCarrito) {
-    // Si ya existe, aumentar cantidad
     productoEnCarrito.cantidad += 1;
   } else {
-    // Sino, agregar nuevo producto con cantidad 1
     carrito.push({...producto, cantidad: 1});
   }
 
-  // Guardar carrito actualizado en localStorage
-  localStorage.setItem('carrito', JSON.stringify(carrito));
+  // Guardar carrito actualizado
+  guardarCarrito(carrito);
 
   alert(`${producto.titulo} agregado al carrito.`);
   // Opcional: actualizar la vista del carrito si tienes un contenedor para eso
@@ -150,7 +179,7 @@ function renderizarCarrito() {
   const contenedor = document.getElementById('lista-carrito');
   if (!contenedor) return;
 
-  const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+  const carrito = obtenerCarrito();
 
   contenedor.innerHTML = '';
 
@@ -180,8 +209,6 @@ function renderizarCarrito() {
     `;
     contenedor.appendChild(card);
   });
-
-  // Opcional: podrías agregar total, botones para eliminar productos, etc.
 }
 
 // Ejecutar renderizado del catálogo cuando carga la página

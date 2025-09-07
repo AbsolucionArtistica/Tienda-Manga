@@ -24,7 +24,12 @@
                     <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
                     <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
                     <li class="nav-item"><a class="nav-link" href="carrito.html">Carrito</a></li>
-                    <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesion</a></li>
+                    <li class="nav-item"><a class="nav-link" href="cuenta.html">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                        </svg>
+                    </a></li>
                 </ul>
             </div>
         </div>
@@ -33,12 +38,26 @@
     <!-- Header -->
     <header class="text-white text-center py-5 main-color">
         <div class="container">
-            <h1 class="display-4">Inicia Sesion</h1>
+            <h1 class="display-4">Crear una Cuenta</h1>
         </div>
     </header>
     <main>
         <div class="container mt-5">
             <form class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="text" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" placeholder="Nombre" required />
+                    <div class="invalid-feedback">
+                        Por favor, ingresa un nombre válido.
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="text" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control" id="apellidos" placeholder="Apellidos" required />
+                    <div class="invalid-feedback">
+                        Por favor, ingresa un apellidos válidos.
+                    </div>
+                </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
                     <input type="email" class="form-control" id="email" placeholder="nombre@ejemplo.com" required />
@@ -53,7 +72,8 @@
                     <div class="invalid-feedback">
                         Por favor, ingresa su contraseña
                     </div>
-                    <a class="text-center">olvide mi contraseña</a>
+                    <a class="text-center px-2">Olvide mi contraseña</a>
+                    <a class="text-center px-2" href="login.html">Ya tengo cuenta</a>
                 </div>
                 <button class="btn btn-primary my-4" type="submit">Enviar</button>
             </form>
