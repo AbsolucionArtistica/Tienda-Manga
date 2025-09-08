@@ -117,6 +117,11 @@ function obtenerCarrito() {
   }
 }
 
+// --- Obtener productos desde localStorage si existen, si no usar los hardcodeados ---
+function getProductosCatalogo() {
+  return JSON.parse(localStorage.getItem('productos')) || productos;
+}
+
 // --- Renderiza el catálogo en el contenedor con id "lista-productos" ---
 function renderizarCatalogo() {
   const contenedor = document.getElementById('lista-productos');
@@ -124,7 +129,7 @@ function renderizarCatalogo() {
 
   contenedor.innerHTML = '';
 
-  productos.forEach(producto => {
+  getProductosCatalogo().forEach(producto => {
     const card = document.createElement('div');
     card.className = 'col-3';
     card.innerHTML = `
@@ -153,7 +158,8 @@ function renderizarCatalogo() {
 function agregarAlCarrito(event) {
   event.preventDefault();
   const idProducto = parseInt(event.currentTarget.getAttribute('data-id'));
-  const producto = productos.find(p => p.id === idProducto);
+  // Buscar el producto en el catálogo actualizado, no en la lista estática
+  const producto = getProductosCatalogo().find(p => p.id === idProducto);
   if (!producto) return;
 
   // Obtener carrito desde localStorage o por usuario
@@ -261,8 +267,20 @@ function renderizarCarrito() {
   });
 }
 
+// --- Inicializar productos en localStorage si no existen ---
+if (!localStorage.getItem('productos') || JSON.parse(localStorage.getItem('productos')).length === 0) {
+  localStorage.setItem('productos', JSON.stringify(productos));
+}
+
 // Ejecutar renderizado del catálogo cuando carga la página
 document.addEventListener('DOMContentLoaded', () => {
   renderizarCatalogo();
   renderizarCarrito(); // si tienes contenedor para carrito en la página actual
+});
+
+// --- Actualiza catálogo automáticamente si cambia localStorage (productos) ---
+window.addEventListener('storage', function(e) {
+  if (e.key === 'productos') {
+    renderizarCatalogo();
+  }
 });

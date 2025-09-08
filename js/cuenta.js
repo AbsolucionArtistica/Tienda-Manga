@@ -189,6 +189,15 @@ function renderizarCuenta() {
   });
 }
 
+// Redirección automática a admin.html si el usuario es admin
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof getUsuarioLogueado === 'function' && getUsuarioLogueado() === 'admin') {
+    if (!window.location.pathname.endsWith('admin.html')) {
+      window.location.href = 'pages/admin.html';
+    }
+  }
+});
+
 // Inicialización
 window.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded');
